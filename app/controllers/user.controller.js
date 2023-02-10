@@ -20,6 +20,7 @@ exports.getUser = (req, res) => {
         location: user.location,
         site: user.site,
         birthday: user.birthday,
+        registration_date: user.createdAt,
       });
     })
     .catch((err) => {
