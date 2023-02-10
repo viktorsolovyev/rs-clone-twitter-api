@@ -3,4 +3,5 @@ const { authJwt } = require("../middleware");
 
 module.exports = function (app) {
   app.get("/api/users/:username", [authJwt.verifyToken], controller.getUser);
+  app.patch("/api/users/:username", [authJwt.verifyToken], controller.update);
 };
