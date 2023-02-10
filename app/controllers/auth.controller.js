@@ -17,9 +17,13 @@ exports.signup = (req, res) => {
     location: req.body.location,
     site: req.body.site,
     birthday: req.body.birthday,
-  }).catch((err) => {
-    res.status(500).send({ message: err.message });
-  });
+  })
+    .then((user) => {
+        res.status(200).send({ message: "User was registered successfully!" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
 };
 
 exports.signin = (req, res) => {
