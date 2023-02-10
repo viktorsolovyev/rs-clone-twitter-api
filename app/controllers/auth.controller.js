@@ -57,6 +57,12 @@ exports.signin = (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        name: user.name,
+        about: user.about,
+        location: user.location,
+        site: user.site,
+        birthday: user.birthday,
+        registration_date: user.createdAt,
         accessToken: token,
       });
     })
