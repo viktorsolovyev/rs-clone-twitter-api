@@ -1,6 +1,7 @@
-import express from "express";
-import { json, urlencoded } from "body-parser";
-import cors from "cors";
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const db = require("./app/models");
 
 const app = express();
 
@@ -9,18 +10,17 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-app.use(json());
-app.use(urlencoded({ extended: true }));
-
-const db = require("./app/models");
-db.sequelize.sync({ force: true }).then(() => {
-  console.log("Drop and Resync Db");
-});
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+  
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to rs-clone-twitter-api application." });
 });
+
+db.sequelize.sync({ force: true }).then(() => {
+    console.log("Drop and Resync Db");
+  })
+  .catch((err) => console.log(err));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

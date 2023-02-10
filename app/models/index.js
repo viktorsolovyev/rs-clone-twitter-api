@@ -1,12 +1,10 @@
-import  * as config from "../config/db.config.js";
-import initUser from "../models/user.model.js";
+const config = require("../config/db.config.js");
+const initUser = require("../models/user.model.js");
 
-import Sequelize from "sequelize";
+const Sequelize = require("sequelize");
 const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
   dialect: config.dialect,
-  operatorsAliases: false,
-
   pool: {
     max: config.pool.max,
     min: config.pool.min,
@@ -22,4 +20,4 @@ db.sequelize = sequelize;
 
 db.user = initUser(sequelize, Sequelize);
 
-export default db;
+module.exports = db;
