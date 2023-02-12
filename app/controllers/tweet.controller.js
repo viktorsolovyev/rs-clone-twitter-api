@@ -24,13 +24,21 @@ exports.get = (req, res) => {
   }).then((user) => {
     Tweet.findAll({
       order: [["createdAt", "DESC"]],
-      offset: req.params.offset ? req.params.offset : 0,
-      limit: req.params.limit ? req.params.limit : 10,
+      offset: req.query.offset ? req.query.offset : 0,
+      limit: req.query.limit ? req.query.limit : 10,
       where: {
         userId: user.id,
       },
+      attributes: ["id", "parent_ID", "text", "createdAt"],
+      include: [
+        {
+          model: User,
+          attributes: ["username"],          
+        },
+      ],
     })
       .then((tweets) => {
+        res.setHeader('Content-Type', 'application/json');
         res.status(200).send(JSON.stringify(tweets, null, 2));
       })
       .catch((err) => {
