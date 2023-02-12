@@ -22,4 +22,6 @@ db.sequelize = sequelize;
 db.user = initUser(sequelize, Sequelize);
 db.tweet = initTweet(sequelize, Sequelize);
 
+db.user.hasMany(db.tweet);
+
 module.exports = db;

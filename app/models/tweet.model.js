@@ -3,15 +3,6 @@ module.exports = (sequelize, Sequelize) => {
     parent_ID: {
       type: Sequelize.INTEGER,
     },
-    user_ID: {
-      type: Sequelize.INTEGER,
-      onDelete: "CASCADE",
-      references: {
-        model: "Users",
-        key: "id",
-        as: "userId",
-      },
-    },
     text: {
       type: Sequelize.TEXT,
     },
