@@ -22,6 +22,7 @@ db.sequelize = sequelize;
 db.user = initUser(sequelize, Sequelize);
 db.tweet = initTweet(sequelize, Sequelize);
 
-db.user.hasMany(db.tweet);
+db.user.hasMany(db.tweet, { onDelete: "cascade" });
+db.tweet.belongsTo(db.user);
 
 module.exports = db;
