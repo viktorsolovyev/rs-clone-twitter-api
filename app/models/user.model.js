@@ -25,6 +25,15 @@ module.exports = (sequelize, Sequelize) => {
     birthday: {
       type: Sequelize.DATE,
     },
+    imageType: {
+      type: Sequelize.STRING,
+    },
+    imageName: {
+      type: Sequelize.STRING,
+    },
+    imageData: {
+      type: Sequelize.BLOB('long'),
+    },
   });
 
   return User;
