@@ -27,9 +27,6 @@ db.media = initMedia(sequelize, Sequelize);
 db.user.hasMany(db.tweet, { onDelete: "cascade" });
 db.tweet.belongsTo(db.user);
 
-db.user.hasOne(db.media, { onDelete: "cascade" });
-db.media.belongsTo(db.user);
-
 db.tweet.hasMany(db.media, { onDelete: "cascade" });
 db.media.belongsTo(db.tweet);
 
