@@ -20,7 +20,7 @@ exports.addMockData = async () => {
     username: "ben",
     email: "ben@gmail.com",
     password: bcrypt.hashSync("12345", 8),
-    name: "Viktor Solovyev",
+    name: "Ben Affleck",
     about: "a little stuped junior frontend developer",
     location: "Russia, Moscow",
     site: "www.twitter.com",
@@ -56,5 +56,5 @@ exports.addMockData = async () => {
     leader: 2,
     follower: 1,
   });
-  
+
 };
