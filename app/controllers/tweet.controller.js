@@ -2,6 +2,7 @@ const db = require("../models");
 const Tweet = db.tweet;
 const User = db.user;
 const Follower = db.follower;
+const Like = db.like;
 
 exports.add = (req, res) => {
   // save Tweet to Database
@@ -26,20 +27,41 @@ exports.get = async (req, res) => {
   const followingsID = followings.map((element) => element.leader);
   followingsID.push(req.userId);
   const tweets = await Tweet.findAll({
-        order: [["createdAt", "DESC"]],
-        offset: req.query.offset ? req.query.offset : 0,
-        limit: req.query.limit ? req.query.limit : 10,
-        where: {
-          userId: followingsID,
-        },
-        attributes: ["id", "parent_ID", "text", "createdAt"],
-        include: [
-          {
-            model: User,
-            attributes: ["username"],
-          },
-        ],
-      })
+    order: [["createdAt", "DESC"]],
+    offset: req.query.offset ? req.query.offset : 0,
+    limit: req.query.limit ? req.query.limit : 10,
+    where: {
+      userId: followingsID,
+    },
+    attributes: ["id", "parent_ID", "text", "createdAt"],
+    include: [
+      {
+        model: User,
+        attributes: ["username"],
+      },
+    ],
+    raw: true,
+    nest: true,
+  });
+
+  for (let tweet of tweets) {
+    const amountLikes = await Like.count({
+      where: {
+        tweetId: tweet.id,
+      },
+    });
+
+    const liked = await Like.findOne({
+      where: {
+        tweetId: tweet.id,
+        userId: req.userId,
+      },
+    });
+
+    tweet.likes = amountLikes;
+    tweet.liked = liked ? true : false;
+  }
+
   res.setHeader("Content-Type", "application/json");
   res.status(200).send(JSON.stringify(tweets, null, 2));
 };
