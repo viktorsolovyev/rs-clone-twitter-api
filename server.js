@@ -26,6 +26,7 @@ db.sequelize.sync({ force: true }).then(() => {
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/tweet.routes')(app);
+require('./app/routes/follower.routes')(app);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
