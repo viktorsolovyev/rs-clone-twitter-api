@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const db = require("./app/models");
+const mock = require("./app/utils/mock");
 
 const app = express();
 
@@ -18,7 +19,8 @@ app.get("/", (req, res) => {
 });
 
 db.sequelize.sync({ force: true }).then(() => {
-    console.log("Drop and Resync Db");
+    console.log("Drop and Resync Db");    
+    mock.addMockData();
   })
   .catch((err) => console.log(err));
 
@@ -26,6 +28,7 @@ db.sequelize.sync({ force: true }).then(() => {
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/tweet.routes')(app);
+require('./app/routes/follower.routes')(app);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
