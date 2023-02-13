@@ -1,6 +1,7 @@
 const db = require("../models");
 const Tweet = db.tweet;
 const User = db.user;
+const Follower = db.follower;
 
 exports.add = (req, res) => {
   // save Tweet to Database
@@ -16,33 +17,29 @@ exports.add = (req, res) => {
     });
 };
 
-exports.get = (req, res) => {
-  User.findOne({
+exports.get = async (req, res) => {
+  const followings = await Follower.findAll({
     where: {
-      id: req.userId,
+      follower: req.userId,
     },
-  }).then((user) => {
-    Tweet.findAll({
-      order: [["createdAt", "DESC"]],
-      offset: req.query.offset ? req.query.offset : 0,
-      limit: req.query.limit ? req.query.limit : 10,
-      where: {
-        userId: user.id,
-      },
-      attributes: ["id", "parent_ID", "text", "createdAt"],
-      include: [
-        {
-          model: User,
-          attributes: ["username"],          
-        },
-      ],
-    })
-      .then((tweets) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).send(JSON.stringify(tweets, null, 2));
-      })
-      .catch((err) => {
-        res.status(500).send({ message: err.message });
-      });
   });
+  const followingsID = followings.map((element) => element.leader);
+  followingsID.push(req.userId);
+  const tweets = await Tweet.findAll({
+        order: [["createdAt", "DESC"]],
+        offset: req.query.offset ? req.query.offset : 0,
+        limit: req.query.limit ? req.query.limit : 10,
+        where: {
+          userId: followingsID,
+        },
+        attributes: ["id", "parent_ID", "text", "createdAt"],
+        include: [
+          {
+            model: User,
+            attributes: ["username"],
+          },
+        ],
+      })
+  res.setHeader("Content-Type", "application/json");
+  res.status(200).send(JSON.stringify(tweets, null, 2));
 };
