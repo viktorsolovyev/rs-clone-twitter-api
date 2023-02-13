@@ -29,6 +29,7 @@ require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/tweet.routes')(app);
 require('./app/routes/follower.routes')(app);
+require('./app/routes/like.routes')(app);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
