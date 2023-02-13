@@ -1,10 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
   const Follower = sequelize.define("followers", {
     leader: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
     },
     follower: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
     },
   });
 

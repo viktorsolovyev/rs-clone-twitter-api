@@ -4,14 +4,14 @@ const User = db.user;
 
 exports.follow = async (req, res) => {
   try {
-    const currentUser = await User.findOne({
+    const user = await User.findOne({
       where: {
-        id: req.userId,
+        username: req.body.username,
       },
     });
     const follower = await Follower.create({
-      leader: req.body.username,
-      follower: currentUser.username,
+      leader: user.id,
+      follower: req.userId,
     });
     res.status(201).send({ message: "Follower was added successfully!" });
   } catch (err) {
@@ -21,15 +21,15 @@ exports.follow = async (req, res) => {
 
 exports.unfollow = async (req, res) => {
   try {
-    const currentUser = await User.findOne({
+    const user = await User.findOne({
       where: {
-        id: req.userId,
+        username: req.body.username,
       },
     });
     await Follower.destroy({
       where: {
-        leader: req.body.username,
-        follower: currentUser.username,
+        leader: user.id,
+        follower: req.userId,
       },
     });
     res.status(200).send({ message: "Follower was deleted successfully!" });
