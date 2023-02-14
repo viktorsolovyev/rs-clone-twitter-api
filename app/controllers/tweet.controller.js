@@ -47,7 +47,7 @@ exports.get = async (req, res) => {
     where: {
       userId: userIds,
     },
-    attributes: ["id", "parent_ID", "text", "createdAt"],
+    attributes: ["id", "parentId", "text", "createdAt"],
     include: [
       {
         model: User,
