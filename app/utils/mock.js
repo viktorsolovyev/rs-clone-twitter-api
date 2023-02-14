@@ -2,6 +2,7 @@ const db = require("../models");
 const Tweet = db.tweet;
 const User = db.user;
 const Follower = db.follower;
+const Like = db.like;
 const bcrypt = require("bcryptjs");
 
 exports.addMockData = async () => {
@@ -57,4 +58,8 @@ exports.addMockData = async () => {
     follower: 1,
   });
 
+  await Like.create({
+    tweetId: 2,
+    userId: 1,
+  });
 };
