@@ -57,4 +57,8 @@ exports.addMockData = async () => {
     follower: 1,
   });
 
+  await Like.create({
+    tweetId: 4,
+    userId: 1,
+  });
 };
