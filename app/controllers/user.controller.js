@@ -15,12 +15,12 @@ exports.getUser = async (req, res) => {
     }
     const amountFollowers = await Follower.count({
       where: {
-        leader: username,
+        leader: user.id,
       },
     });
     const amountFollowing = await Follower.count({
       where: {
-        follower: username,
+        follower: user.id,
       },
     });
     res.status(200).send({

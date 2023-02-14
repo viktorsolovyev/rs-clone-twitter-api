@@ -19,19 +19,33 @@ exports.add = (req, res) => {
 };
 
 exports.get = async (req, res) => {
-  const followings = await Follower.findAll({
-    where: {
-      follower: req.userId,
-    },
-  });
-  const followingsID = followings.map((element) => element.leader);
-  followingsID.push(req.userId);
+  const username = req.query.username;
+  const userIds = [];
+
+  if (!username) {
+    const followings = await Follower.findAll({
+      where: {
+        follower: req.userId,
+      },
+    });
+    const followingsId = followings.map((element) => element.leader);
+    userIds.push(req.userId);
+    userIds.push(...followingsId);
+  } else {
+    const user = await User.findOne({
+      where: {
+        username: username,
+      },
+    });
+    userIds.push(user.id);
+  }
+
   const tweets = await Tweet.findAll({
     order: [["createdAt", "DESC"]],
     offset: req.query.offset ? req.query.offset : 0,
     limit: req.query.limit ? req.query.limit : 10,
     where: {
-      userId: followingsID,
+      userId: userIds,
     },
     attributes: ["id", "parent_ID", "text", "createdAt"],
     include: [
