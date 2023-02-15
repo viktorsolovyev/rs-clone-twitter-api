@@ -34,6 +34,9 @@ exports.getUser = async (req, res) => {
       registration_date: user.createdAt,
       followers: amountFollowers,
       following: amountFollowing,
+      imageType: user.imageType,
+      imageName: user.imageName,
+      imageData: user.imageData.toString("base64"),
     });
   } catch (err) {
     res.status(500).send({ message: err.message });
@@ -75,4 +78,30 @@ exports.update = (req, res) => {
         message: `Error updating User with username=${username}`,
       });
     });
+};
+
+exports.changeAvatar = async (req, res) => {
+  try {
+    const num = await User.update(
+      {
+        imageType: req.file.mimetype,
+        imageName: req.file.originalname,
+        imageData: req.file.buffer,
+      },
+      {
+        where: { id: req.userId },
+      }
+    );
+    if (num.length === 1) {
+      res.status(200).send({
+        message: "Avatar was updated successfully.",
+      });
+    } else {
+      res.status(500).send({
+        message: `Cannot update avatar!`,
+      });
+    }
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
