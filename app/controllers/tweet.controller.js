@@ -9,6 +9,7 @@ exports.add = (req, res) => {
   Tweet.create({
     userId: req.userId,
     text: req.body.text,
+    parentId: req.body.parentId,
   })
     .then((tweet) => {
       res.status(201).send({ message: "Tweet was added successfully!" });
@@ -19,39 +20,54 @@ exports.add = (req, res) => {
 };
 
 exports.get = async (req, res) => {
-  const username = req.query.username;
-  const userIds = [];
+  const order = [["createdAt", "DESC"]];
+  const offset = req.query.offset ? req.query.offset : 0;
+  const limit = req.query.limit ? req.query.limit : 10;
 
-  if (!username) {
+  const username = req.query.username;
+  const tweetId = req.query.tweetId;
+  let tweets;
+
+  if (tweetId) {
+    tweets = await getTweets(req, order, offset, limit, { parentId: tweetId });
+  } else if (username) {
+    const user = await User.findOne({
+      where: {
+        username: username,
+      },
+    });
+    if (user) {
+      tweets = await getTweets(req, order, offset, limit, { userId: user.id });
+    } else {
+      tweets = [];
+    }
+  } else {
     const followings = await Follower.findAll({
       where: {
         follower: req.userId,
       },
     });
     const followingsId = followings.map((element) => element.leader);
-    userIds.push(req.userId);
-    userIds.push(...followingsId);
-  } else {
-    const user = await User.findOne({
-      where: {
-        username: username,
-      },
+    tweets = await getTweets(req, order, offset, limit, {
+      userId: [req.userId, ...followingsId],
     });
-    userIds.push(user.id);
   }
 
+  res.setHeader("Content-Type", "application/json");
+  res.status(200).send(JSON.stringify(tweets, null, 2));
+};
+
+async function getTweets(req, order, offset, limit, condition) {
   const tweets = await Tweet.findAll({
-    order: [["createdAt", "DESC"]],
-    offset: req.query.offset ? req.query.offset : 0,
-    limit: req.query.limit ? req.query.limit : 10,
-    where: {
-      userId: userIds,
-    },
-    attributes: ["id", "parent_ID", "text", "createdAt"],
+    order: order,
+    offset: offset,
+    limit: limit,
+    where: condition,
+    attributes: ["id", "parentId", "text", "createdAt"],
     include: [
       {
         model: User,
-        attributes: ["username"],
+        attributes: ["name", "username"],
       },
     ],
     raw: true,
@@ -59,23 +75,31 @@ exports.get = async (req, res) => {
   });
 
   for (let tweet of tweets) {
+    // likes
     const amountLikes = await Like.count({
       where: {
         tweetId: tweet.id,
       },
     });
+    tweet.likes = amountLikes;
 
+    // liked
     const liked = await Like.findOne({
       where: {
         tweetId: tweet.id,
         userId: req.userId,
       },
     });
-
-    tweet.likes = amountLikes;
     tweet.liked = liked ? true : false;
+
+    // replies
+    const amountReplies = await Tweet.count({
+      where: {
+        parentId: tweet.id,
+      },
+    });
+    tweet.replies = amountReplies;
   }
 
-  res.setHeader("Content-Type", "application/json");
-  res.status(200).send(JSON.stringify(tweets, null, 2));
-};
+  return tweets;
+}

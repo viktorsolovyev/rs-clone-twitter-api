@@ -9,9 +9,11 @@ exports.follow = async (req, res) => {
         username: req.body.username,
       },
     });
-    const follower = await Follower.create({
-      leader: user.id,
-      follower: req.userId,
+    await Follower.findOrCreate({
+      where: {
+         leader: user.id,
+         follower: req.userId,
+      },
     });
     res.status(201).send({ message: "Follower was added successfully!" });
   } catch (err) {

@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const Tweet = sequelize.define("tweets", {
-    parent_ID: {
+    parentId: {
       type: Sequelize.INTEGER,
     },
     text: {
