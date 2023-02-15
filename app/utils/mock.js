@@ -53,6 +53,13 @@ exports.addMockData = async () => {
     text: "This is my 2 tweet on this fucking server",
   });
 
+  await Tweet.create({
+    userId: 1,
+    text: "This is my 1 reply to the tweet 5 on this fucking server",
+    parentId: 5
+  });
+
+
   await Follower.create({
     leader: 2,
     follower: 1,
