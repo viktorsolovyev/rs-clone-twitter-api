@@ -3,20 +3,31 @@ const Tweet = db.tweet;
 const User = db.user;
 const Follower = db.follower;
 const Like = db.like;
+const Media = db.media;
 
-exports.add = (req, res) => {
-  // save Tweet to Database
-  Tweet.create({
-    userId: req.userId,
-    text: req.body.text,
-    parentId: req.body.parentId,
-  })
-    .then((tweet) => {
-      res.status(201).send({ message: "Tweet was added successfully!" });
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
+exports.add = async (req, res) => {
+  try {
+    const tweet = await Tweet.create({
+      userId: req.userId,
+      text: req.body.text,
+      parentId: req.body.parentId ? req.body.parentId : null,
     });
+    if (req.files) {
+      const images = [];
+      req.files.forEach((file) => {
+        images.push({
+          tweetId: tweet.id,
+          type: file.mimetype,
+          name: file.originalname,
+          data: file.buffer,
+        });
+      });
+      await Media.bulkCreate(images);
+    }
+    res.status(201).send({ message: "Tweet was added successfully!" });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
 exports.get = async (req, res) => {
@@ -99,6 +110,21 @@ async function getTweets(req, order, offset, limit, condition) {
       },
     });
     tweet.replies = amountReplies;
+
+    // images
+    tweet.images = [];
+    const images = await Media.findAll({
+      where: {
+        tweetId: tweet.id,
+      },
+    });
+    for (let image of images) {
+      tweet.images.push({
+        type: image.type,
+        name: image.name,
+        data: image.data ? image.data.toString("base64") : "",
+      });
+    }
   }
 
   return tweets;
