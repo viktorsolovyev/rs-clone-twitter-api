@@ -3,6 +3,7 @@ const Tweet = db.tweet;
 const User = db.user;
 const Follower = db.follower;
 const Like = db.like;
+const View = db.view;
 const bcrypt = require("bcryptjs");
 
 exports.addMockData = async () => {
@@ -68,6 +69,29 @@ exports.addMockData = async () => {
     {
       tweetId: 2,
       userId: 1,
+    },
+    {
+      tweetId: 1,
+      userId: 2,
+    },
+    {
+      tweetId: 3,
+      userId: 1,
+    },
+  ]);
+
+  await View.bulkCreate([
+    {
+      tweetId: 2,
+      userId: 1,
+    },
+    {
+      tweetId: 5,
+      userId: 1,
+    },
+    {
+      tweetId: 4,
+      userId: 2,
     },
   ]);
 };
