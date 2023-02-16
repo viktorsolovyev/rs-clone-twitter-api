@@ -4,6 +4,7 @@ const User = db.user;
 const Follower = db.follower;
 const Like = db.like;
 const Media = db.media;
+const View = db.view;
 
 exports.add = async (req, res) => {
   try {
@@ -110,6 +111,14 @@ async function getTweets(req, order, offset, limit, condition) {
       },
     });
     tweet.replies = amountReplies;
+
+    // views
+    const amountViews = await View.count({
+      where: {
+        tweetId: tweet.id,
+      },
+    });
+    tweet.views = amountViews;
 
     // images
     tweet.images = [];
