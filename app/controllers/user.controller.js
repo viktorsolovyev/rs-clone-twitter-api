@@ -36,7 +36,7 @@ exports.getUser = async (req, res) => {
       following: amountFollowing,
       imageType: user.imageType,
       imageName: user.imageName,
-      imageData: user.imageData.toString("base64"),
+      imageData: user.imageData ? user.imageData.toString("base64") : "",
     });
   } catch (err) {
     res.status(500).send({ message: err.message });
