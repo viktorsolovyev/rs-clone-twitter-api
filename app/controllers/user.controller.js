@@ -1,6 +1,7 @@
 const db = require("../models");
 const User = db.user;
 const Follower = db.follower;
+const Tweet = db.tweet;
 
 exports.getUser = async (req, res) => {
   const username = req.params.username;
@@ -23,6 +24,13 @@ exports.getUser = async (req, res) => {
         follower: user.id,
       },
     });
+
+    const totalTweets = await Tweet.count({
+      where: {
+        userId: user.id,
+      },
+    });
+
     res.status(200).send({
       username: user.username,
       email: user.email,
@@ -34,6 +42,7 @@ exports.getUser = async (req, res) => {
       registration_date: user.createdAt,
       followers: amountFollowers,
       following: amountFollowing,
+      tweets: totalTweets,
       avatar: {
         imageType: user.imageType,
         imageName: user.imageName,
