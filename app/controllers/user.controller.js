@@ -14,17 +14,44 @@ exports.getUser = async (req, res) => {
     if (!user) {
       return res.status(404).send({ message: "User Not found." });
     }
-    const amountFollowers = await Follower.count({
+
+    // followers
+    const followers = await Follower.findAll({
       where: {
         leader: user.id,
       },
+      raw: true,
+      nest: true,
     });
-    const amountFollowing = await Follower.count({
+    const followersIds = followers.map((follower) => follower.follower);
+    const followersUsers = await User.findAll({
+      where: {
+        id: followersIds
+      },
+      attributes: ["username", "name"],
+      raw: true,
+      nest: true,
+    });
+
+    // following
+    const following = await Follower.findAll({
       where: {
         follower: user.id,
       },
+      raw: true,
+      nest: true,
+    });
+    const followingIds = following.map((follow) => follow.leader);
+    const followingUsers = await User.findAll({
+      where: {
+        id: followingIds
+      },
+      attributes: ["username", "name"],
+      raw: true,
+      nest: true,
     });
 
+    // tweets
     const totalTweets = await Tweet.count({
       where: {
         userId: user.id,
@@ -40,8 +67,8 @@ exports.getUser = async (req, res) => {
       site: user.site ? user.site : "",
       birthday: user.birthday,
       registration_date: user.createdAt,
-      followers: amountFollowers,
-      following: amountFollowing,
+      followers: followersUsers,
+      following: followingUsers,
       tweets: totalTweets,
       avatar: {
         imageType: user.imageType,
