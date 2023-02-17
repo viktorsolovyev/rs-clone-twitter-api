@@ -3,79 +3,14 @@ const User = db.user;
 const Follower = db.follower;
 const Tweet = db.tweet;
 
-exports.getUser = async (req, res) => {
-  const username = req.params.username;
+exports.getUser = async (req, res) => {  
   try {
-    const user = await User.findOne({
-      where: {
-        username: username,
-      },
-    });
+    const username = req.params.username;
+    const user = await exports.getUserProfileByUsername(username);
     if (!user) {
       return res.status(404).send({ message: "User Not found." });
     }
-
-    // followers
-    const followers = await Follower.findAll({
-      where: {
-        leader: user.id,
-      },
-      raw: true,
-      nest: true,
-    });
-    const followersIds = followers.map((follower) => follower.follower);
-    const followersUsers = await User.findAll({
-      where: {
-        id: followersIds
-      },
-      attributes: ["username", "name"],
-      raw: true,
-      nest: true,
-    });
-
-    // following
-    const following = await Follower.findAll({
-      where: {
-        follower: user.id,
-      },
-      raw: true,
-      nest: true,
-    });
-    const followingIds = following.map((follow) => follow.leader);
-    const followingUsers = await User.findAll({
-      where: {
-        id: followingIds
-      },
-      attributes: ["username", "name"],
-      raw: true,
-      nest: true,
-    });
-
-    // tweets
-    const totalTweets = await Tweet.count({
-      where: {
-        userId: user.id,
-      },
-    });
-
-    res.status(200).send({
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      about: user.about ? user.about : "",
-      location: user.location ? user.location : "",
-      site: user.site ? user.site : "",
-      birthday: user.birthday,
-      registration_date: user.createdAt,
-      followers: followersUsers,
-      following: followingUsers,
-      tweets: totalTweets,
-      avatar: {
-        imageType: user.imageType,
-        imageName: user.imageName,
-        imageData: user.imageData ? user.imageData.toString("base64") : "",
-      },
-    });
+    res.status(200).send(user);
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
@@ -143,3 +78,77 @@ exports.changeAvatar = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+exports.getUserProfileByUsername = async (username) => {
+  const user = await User.findOne({
+    where: {
+      username: username,
+    },
+  });
+  if (!user) {
+    return undefined;
+  }
+
+  // followers
+  const followers = await Follower.findAll({
+    where: {
+      leader: user.id,
+    },
+    raw: true,
+    nest: true,
+  });
+  const followersIds = followers.map((follower) => follower.follower);
+  const followersUsers = await User.findAll({
+    where: {
+      id: followersIds,
+    },
+    attributes: ["username", "name"],
+    raw: true,
+    nest: true,
+  });
+
+  // following
+  const following = await Follower.findAll({
+    where: {
+      follower: user.id,
+    },
+    raw: true,
+    nest: true,
+  });
+  const followingIds = following.map((follow) => follow.leader);
+  const followingUsers = await User.findAll({
+    where: {
+      id: followingIds,
+    },
+    attributes: ["username", "name"],
+    raw: true,
+    nest: true,
+  });
+
+  // tweets
+  const totalTweets = await Tweet.count({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    name: user.name,
+    about: user.about ? user.about : "",
+    location: user.location ? user.location : "",
+    site: user.site ? user.site : "",
+    birthday: user.birthday,
+    registration_date: user.createdAt,
+    followers: followersUsers,
+    following: followingUsers,
+    tweets: totalTweets,
+    avatar: {
+      imageType: user.imageType,
+      imageName: user.imageName,
+      imageData: user.imageData ? user.imageData.toString("base64") : "",
+    },
+  };
+}
