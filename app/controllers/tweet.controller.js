@@ -58,15 +58,14 @@ exports.get = async (req, res) => {
       tweets = [];
     }
   } else {
-    const followings = await Follower.findAll({
-      where: {
-        follower: req.userId,
-      },
-    });
-    const followingsId = followings.map((element) => element.leader);
-    tweets = await getTweets(req, order, offset, limit, {
-      userId: [req.userId, ...followingsId],
-    });
+    // const followings = await Follower.findAll({
+    //   where: {
+    //     follower: req.userId,
+    //   },
+    // });
+    // const followingsId = followings.map((element) => element.leader);
+    // const condition = {userId: [req.userId, ...followingsId],}; 
+    tweets = await getTweets(req, order, offset, limit);
   }
 
   res.setHeader("Content-Type", "application/json");
@@ -87,7 +86,7 @@ exports.delete = async (req, res) => {
   }
 };
 
-async function getTweets(req, order, offset, limit, condition) {
+async function getTweets(req, order, offset, limit, condition={}) {
   const tweets = await Tweet.findAll({
     order: order,
     offset: offset,
