@@ -10,8 +10,9 @@ exports.add = async (req, res) => {
   try {
     const tweet = await Tweet.create({
       userId: req.userId,
-      text: req.body.text,
+      text: req.body.text ? req.body.text : "",
       parentId: req.body.parentId ? req.body.parentId : null,
+      isRetweet: req.body.isRetweet ? Boolean(req.body.isRetweet) : false,
     });
     if (req.files) {
       const images = [];
@@ -32,7 +33,7 @@ exports.add = async (req, res) => {
 };
 
 exports.get = async (req, res) => {
-  const order = [["createdAt", "DESC"]];
+  const order = [["id", "DESC"]];
   const offset = req.query.offset ? req.query.offset : 0;
   const limit = req.query.limit ? req.query.limit : 10;
 
@@ -41,7 +42,10 @@ exports.get = async (req, res) => {
   let tweets;
 
   if (tweetId) {
-    tweets = await getTweets(req, order, offset, limit, { parentId: tweetId });
+    tweets = await getTweets(req, order, offset, limit, {
+      parentId: tweetId,
+      isRetweet: false,
+    });
   } else if (username) {
     const user = await User.findOne({
       where: {
@@ -69,13 +73,27 @@ exports.get = async (req, res) => {
   res.status(200).send(JSON.stringify(tweets, null, 2));
 };
 
+exports.delete = async (req, res) => {
+  try {
+    await Tweet.destroy({
+      where: {
+        id: req.body.tweetId,
+        userId: req.userId,
+      },
+    });
+    res.status(200).send({ message: "Tweet was deleted successfully!" });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
 async function getTweets(req, order, offset, limit, condition) {
   const tweets = await Tweet.findAll({
     order: order,
     offset: offset,
     limit: limit,
     where: condition,
-    attributes: ["id", "parentId", "text", "createdAt"],
+    attributes: ["id", "parentId", "text", "createdAt", "isRetweet"],
     include: [
       {
         model: User,
@@ -87,10 +105,32 @@ async function getTweets(req, order, offset, limit, condition) {
   });
 
   for (let tweet of tweets) {
+    const tweetId = tweet.isRetweet ? tweet.parentId : tweet.id;
+
+    tweet.origin = {};
+    if (tweet.isRetweet) {
+      const origin = await Tweet.findOne({
+        where: {
+          id: tweet.parentId,
+        },
+        include: [
+          {
+            model: User,
+            attributes: ["name", "username"],
+          },
+        ],
+      });
+      if (origin) {
+        tweet.text = origin.text;
+        tweet.origin.createdAt = origin.createdAt;
+        tweet.origin.user = origin.user;
+      }
+    }
+
     // likes
     const amountLikes = await Like.count({
       where: {
-        tweetId: tweet.id,
+        tweetId: tweetId,
       },
     });
     tweet.likes = amountLikes;
@@ -98,7 +138,7 @@ async function getTweets(req, order, offset, limit, condition) {
     // liked
     const liked = await Like.findOne({
       where: {
-        tweetId: tweet.id,
+        tweetId: tweetId,
         userId: req.userId,
       },
     });
@@ -107,7 +147,7 @@ async function getTweets(req, order, offset, limit, condition) {
     // replies
     const amountReplies = await Tweet.count({
       where: {
-        parentId: tweet.id,
+        parentId: tweetId,
       },
     });
     tweet.replies = amountReplies;
@@ -115,16 +155,35 @@ async function getTweets(req, order, offset, limit, condition) {
     // views
     const amountViews = await View.count({
       where: {
-        tweetId: tweet.id,
+        tweetId: tweetId,
       },
     });
     tweet.views = amountViews;
+
+    // retweets
+    const amountRetweets = await Tweet.count({
+      where: {
+        parentId: tweetId,
+        isRetweet: true,
+      },
+    });
+    tweet.retweets = amountRetweets;
+
+    // retweeted
+    const retweeted = await Tweet.findOne({
+      where: {
+        parentId: tweetId,
+        userId: req.userId,
+        isRetweet: true,
+      },
+    });
+    tweet.retweeted = retweeted ? true : false;
 
     // images
     tweet.images = [];
     const images = await Media.findAll({
       where: {
-        tweetId: tweet.id,
+        tweetId: tweetId,
       },
     });
     for (let image of images) {

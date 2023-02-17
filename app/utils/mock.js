@@ -56,6 +56,11 @@ exports.addMockData = async () => {
       text: "This is my 1 reply to the tweet 5 on this fucking server",
       parentId: 5,
     },
+    {
+      userId: 1,
+      isRetweet: true,
+      parentId: 2,
+    },
   ]);
 
   await Follower.bulkCreate([

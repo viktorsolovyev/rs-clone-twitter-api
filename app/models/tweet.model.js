@@ -6,6 +6,9 @@ module.exports = (sequelize, Sequelize) => {
     text: {
       type: Sequelize.TEXT,
     },
+    isRetweet: {
+      type: Sequelize.BOOLEAN,
+    },
   });
 
   return Tweet;
