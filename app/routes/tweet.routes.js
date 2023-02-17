@@ -7,5 +7,5 @@ const upload = multer({ storage: storage });
 module.exports = function (app) {
   app.post("/api/tweets/", [authJwt.verifyToken, upload.array("images")], controller.add);
   app.get("/api/tweets/", [authJwt.verifyToken], controller.get);
-  app.delele("/api/tweets/", [authJwt.verifyToken], controller.delele);
+  app.delete("/api/tweets/", [authJwt.verifyToken], controller.delete);
 };
