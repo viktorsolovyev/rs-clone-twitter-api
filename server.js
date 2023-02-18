@@ -7,7 +7,8 @@ const mock = require("./app/utils/mock");
 const app = express();
 
 const corsOptions = {
-  origin: ["http://localhost:8081", "https://threetter.netlify.app/"]
+  // origin: ["http://localhost:8081", "https://threetter.netlify.app/"]
+  origin: "https://threetter.netlify.app/"
 };
 
 app.use(cors(corsOptions));

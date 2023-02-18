@@ -11,7 +11,7 @@ exports.addMockData = async () => {
     {
       username: "sol",
       email: "sol@gmail.com",
-      password: bcrypt.hashSync("12345", 8),
+      password: bcrypt.hashSync("123456", 8),
       name: "Viktor Solovyev",
       about: "a little stuped junior frontend developer",
       location: "Russia, Moscow",
@@ -21,7 +21,7 @@ exports.addMockData = async () => {
     {
       username: "ben",
       email: "ben@gmail.com",
-      password: bcrypt.hashSync("12345", 8),
+      password: bcrypt.hashSync("123456", 8),
       name: "Ben Affleck",
       about: "a little stuped junior frontend developer",
       location: "Russia, Moscow",
