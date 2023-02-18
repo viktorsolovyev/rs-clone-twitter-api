@@ -64,7 +64,7 @@ exports.get = async (req, res) => {
     //   },
     // });
     // const followingsId = followings.map((element) => element.leader);
-    // const condition = {userId: [req.userId, ...followingsId],}; 
+    // const condition = {userId: [req.userId, ...followingsId],};
     tweets = await getTweets(req, order, offset, limit);
   }
 
@@ -86,7 +86,7 @@ exports.delete = async (req, res) => {
   }
 };
 
-async function getTweets(req, order, offset, limit, condition={}) {
+async function getTweets(req, order, offset, limit, condition = {}) {
   const tweets = await Tweet.findAll({
     order: order,
     offset: offset,
@@ -96,7 +96,7 @@ async function getTweets(req, order, offset, limit, condition={}) {
     include: [
       {
         model: User,
-        attributes: ["name", "username"],
+        attributes: ["username", "name", "imageType", "imageName", "imageData"],
       },
     ],
     raw: true,
@@ -105,6 +105,18 @@ async function getTweets(req, order, offset, limit, condition={}) {
 
   for (let tweet of tweets) {
     const tweetId = tweet.isRetweet ? tweet.parentId : tweet.id;
+
+    // user avatar
+    tweet.user.avatar = {
+      imageType: tweet.user.imageType,
+      imageName: tweet.user.imageName,
+      imageData: tweet.user.imageData
+        ? tweet.user.imageData.toString("base64")
+        : "",
+    };
+    delete tweet.user.imageType;
+    delete tweet.user.imageName;
+    delete tweet.user.imageData;
 
     tweet.origin = {};
     if (tweet.isRetweet) {
@@ -115,14 +127,30 @@ async function getTweets(req, order, offset, limit, condition={}) {
         include: [
           {
             model: User,
-            attributes: ["name", "username"],
+            attributes: [
+              "username",
+              "name",              
+              "imageType",
+              "imageName",
+              "imageData",
+            ],
           },
         ],
       });
       if (origin) {
         tweet.text = origin.text;
         tweet.origin.createdAt = origin.createdAt;
-        tweet.origin.user = origin.user;
+        tweet.origin.user = {
+          username: origin.user.username,
+          name: origin.user.name,          
+          avatar: {
+            imageType: origin.user.imageType,
+            imageName: origin.user.imageName,
+            imageData: origin.user.imageData
+              ? origin.user.imageData.toString("base64")
+              : "",
+          },
+        };
       }
     }
 
