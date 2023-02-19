@@ -3,7 +3,7 @@ const User = db.user;
 const Follower = db.follower;
 const Tweet = db.tweet;
 
-exports.getUser = async (req, res) => {  
+exports.getUser = async (req, res) => {
   try {
     const username = req.params.username;
     const user = await exports.getUserProfileByUsername(username);
@@ -98,13 +98,27 @@ exports.getUserProfileByUsername = async (username) => {
     nest: true,
   });
   const followersIds = followers.map((follower) => follower.follower);
-  const followersUsers = await User.findAll({
+  let followersUsers = await User.findAll({
     where: {
       id: followersIds,
     },
-    attributes: ["username", "name"],
+    attributes: ["username", "name", "imageType", "imageName", "imageData"],
     raw: true,
     nest: true,
+  });
+
+  followersUsers = followersUsers.map((follower) => {
+    return {
+      username: follower.username,
+      name: follower.name,
+      avatar: {
+        imageType: follower.imageType,
+        imageName: follower.imageName,
+        imageData: follower.imageData
+          ? follower.imageData.toString("base64")
+          : "",
+      },
+    };
   });
 
   // following
@@ -116,13 +130,25 @@ exports.getUserProfileByUsername = async (username) => {
     nest: true,
   });
   const followingIds = following.map((follow) => follow.leader);
-  const followingUsers = await User.findAll({
+  let followingUsers = await User.findAll({
     where: {
       id: followingIds,
     },
-    attributes: ["username", "name"],
+    attributes: ["username", "name", "imageType", "imageName", "imageData"],
     raw: true,
     nest: true,
+  });
+
+  followingUsers = followingUsers.map((follow) => {
+    return {
+      username: follow.username,
+      name: follow.name,
+      avatar: {
+        imageType: follow.imageType,
+        imageName: follow.imageName,
+        imageData: follow.imageData ? follow.imageData.toString("base64") : "",
+      },
+    };
   });
 
   // tweets
@@ -151,4 +177,4 @@ exports.getUserProfileByUsername = async (username) => {
       imageData: user.imageData ? user.imageData.toString("base64") : "",
     },
   };
-}
+};
