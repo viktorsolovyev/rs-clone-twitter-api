@@ -50,7 +50,7 @@ exports.signin = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id }, config.secret, {
-      expiresIn: 86400, // 24 hours
+      expiresIn: 1209600, // 24 hours * 14
     });
 
     const userProfile = await userController.getUserProfileByUsername(

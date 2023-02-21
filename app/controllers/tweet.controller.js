@@ -40,12 +40,14 @@ exports.get = async (req, res) => {
   const username = req.query.username;
   const tweetId = req.query.tweetId;
   let tweets;
+  let countAndTweets;
 
   if (tweetId) {
-    tweets = await getTweets(req, order, offset, limit, {
+    countAndTweets = await getTweets(req, order, offset, limit, {
       parentId: tweetId,
       isRetweet: false,
     });
+    tweets = countAndTweets.rows;
   } else if (username) {
     const user = await User.findOne({
       where: {
@@ -53,7 +55,8 @@ exports.get = async (req, res) => {
       },
     });
     if (user) {
-      tweets = await getTweets(req, order, offset, limit, { userId: user.id });
+      countAndTweets = await getTweets(req, order, offset, limit, { userId: user.id });
+      tweets = countAndTweets.rows;
     } else {
       tweets = [];
     }
@@ -65,11 +68,12 @@ exports.get = async (req, res) => {
     // });
     // const followingsId = followings.map((element) => element.leader);
     // const condition = {userId: [req.userId, ...followingsId],};
-    tweets = await getTweets(req, order, offset, limit);
+    countAndTweets = await getTweets(req, order, offset, limit);
+    tweets = countAndTweets.rows;
   }
 
   res.setHeader("Content-Type", "application/json");
-  res.status(200).send(JSON.stringify(tweets, null, 2));
+  res.status(200).send(JSON.stringify({count: countAndTweets.count, tweets: tweets}, null, 2));
 };
 
 exports.delete = async (req, res) => {
@@ -87,7 +91,7 @@ exports.delete = async (req, res) => {
 };
 
 async function getTweets(req, order, offset, limit, condition = {}) {
-  const tweets = await Tweet.findAll({
+  const { count, rows } = await Tweet.findAndCountAll({
     order: order,
     offset: offset,
     limit: limit,
@@ -103,7 +107,7 @@ async function getTweets(req, order, offset, limit, condition = {}) {
     nest: true,
   });
 
-  for (let tweet of tweets) {
+  for (let tweet of rows) {
     const tweetId = tweet.isRetweet ? tweet.parentId : tweet.id;
 
     // user avatar
@@ -129,7 +133,7 @@ async function getTweets(req, order, offset, limit, condition = {}) {
             model: User,
             attributes: [
               "username",
-              "name",              
+              "name",
               "imageType",
               "imageName",
               "imageData",
@@ -142,7 +146,7 @@ async function getTweets(req, order, offset, limit, condition = {}) {
         tweet.origin.createdAt = origin.createdAt;
         tweet.origin.user = {
           username: origin.user.username,
-          name: origin.user.name,          
+          name: origin.user.name,
           avatar: {
             imageType: origin.user.imageType,
             imageName: origin.user.imageName,
@@ -222,5 +226,5 @@ async function getTweets(req, order, offset, limit, condition = {}) {
     }
   }
 
-  return tweets;
+  return { count, rows };
 }
