@@ -179,6 +179,7 @@ async function getTweets(req, order, offset, limit, condition = {}) {
     const amountReplies = await Tweet.count({
       where: {
         parentId: tweetId,
+        isRetweet: false
       },
     });
     tweet.replies = amountReplies;
