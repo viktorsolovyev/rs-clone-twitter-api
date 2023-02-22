@@ -191,6 +191,15 @@ async function getTweets(req, order, offset, limit, condition = {}) {
     });
     tweet.views = amountViews;
 
+    // viewed
+    const viewed = await View.findOne({
+      where: {
+        tweetId: tweetId,
+        userId: req.userId,
+      },
+    });
+    tweet.viewed = viewed ? true : false;
+
     // retweets
     const amountRetweets = await Tweet.count({
       where: {
