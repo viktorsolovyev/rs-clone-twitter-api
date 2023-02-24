@@ -7,6 +7,9 @@ const bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
   // save User to Database
+  let birthday = req.body.birthday ? req.body.birthday.split(".") : undefined;
+  if (birthday) birthday = `${birthday[2]}-${birthday[1]}-${birthday[0]}`;
+  
   User.create({
     username: req.body.username,
     email: req.body.email,
@@ -15,7 +18,7 @@ exports.signup = (req, res) => {
     about: req.body.about,
     location: req.body.location,
     site: req.body.site,
-    birthday: req.body.birthday,
+    birthday: birthday,
   })
     .then((user) => {
       res.status(200).send({ message: "User was registered successfully!" });
