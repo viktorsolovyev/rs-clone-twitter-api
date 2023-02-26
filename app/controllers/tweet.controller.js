@@ -5,6 +5,7 @@ const Follower = db.follower;
 const Like = db.like;
 const Media = db.media;
 const View = db.view;
+const { Op } = require("sequelize");
 
 exports.add = async (req, res) => {
   try {
@@ -45,7 +46,9 @@ exports.get = async (req, res) => {
   if (tweetId) {
     countAndTweets = await getTweets(req, order, offset, limit, {
       parentId: tweetId,
-      isRetweet: false,
+      isRetweet: {
+        [Op.not]: true,
+      },
     });
     tweets = countAndTweets.rows;
   } else if (username) {
@@ -55,7 +58,9 @@ exports.get = async (req, res) => {
       },
     });
     if (user) {
-      countAndTweets = await getTweets(req, order, offset, limit, { userId: user.id });
+      countAndTweets = await getTweets(req, order, offset, limit, {
+        userId: user.id,
+      });
       tweets = countAndTweets.rows;
     } else {
       tweets = [];
@@ -68,12 +73,32 @@ exports.get = async (req, res) => {
     // });
     // const followingsId = followings.map((element) => element.leader);
     // const condition = {userId: [req.userId, ...followingsId],};
-    countAndTweets = await getTweets(req, order, offset, limit);
+    countAndTweets = await getTweets(req, order, offset, limit, {
+      [Op.or]: [
+        { parentId: null },
+        {
+          parentId: { [Op.gt]: 0 },
+          isRetweet: true,
+        },
+      ],
+
+      // [Op.or]: {
+      //   [Op.and]: [
+      //   {parentId: { [Op.gt]: 0 }},
+      //   {isRetweet: {
+      //     [Op.not]: true,
+      //   },
+      // }],
+    });
     tweets = countAndTweets.rows;
   }
 
   res.setHeader("Content-Type", "application/json");
-  res.status(200).send(JSON.stringify({count: countAndTweets.count, tweets: tweets}, null, 2));
+  res
+    .status(200)
+    .send(
+      JSON.stringify({ count: countAndTweets.count, tweets: tweets }, null, 2)
+    );
 };
 
 exports.delete = async (req, res) => {
@@ -179,7 +204,9 @@ async function getTweets(req, order, offset, limit, condition = {}) {
     const amountReplies = await Tweet.count({
       where: {
         parentId: tweetId,
-        isRetweet: false
+        isRetweet: {
+          [Op.not]: true,
+        },
       },
     });
     tweet.replies = amountReplies;
