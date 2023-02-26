@@ -7,7 +7,7 @@ const initLike = require("../models/like.model");
 const initView = require("../models/view.model");
 
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize("postgres://root:a4pDPjMC2iYmw9jqJsKZ9hppgacKRvDH@dpg-cftstt94reb6ks1nkar0-a.frankfurt-postgres.render.com/tweetter");
+const sequelize = new Sequelize("postgres://root:a4pDPjMC2iYmw9jqJsKZ9hppgacKRvDH@dpg-cftstt94reb6ks1nkar0-a/tweetter");
 
 const db = {};
 
