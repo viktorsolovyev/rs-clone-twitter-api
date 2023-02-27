@@ -32,7 +32,7 @@ webSocketServer.on("connection", (ws, req) => {
 });
 
 db.sequelize
-  .sync({ force: true })
+  .sync()
   .then(() => {
     console.log("Drop and Resync Db");
     mock.addMockData();
