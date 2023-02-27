@@ -35,7 +35,7 @@ db.sequelize
   .sync()
   .then(() => {
     console.log("Drop and Resync Db");
-    mock.addMockData();
+   // mock.addMockData();
   })
   .catch((err) => console.log(err));
 
