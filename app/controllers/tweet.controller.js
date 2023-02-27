@@ -15,7 +15,7 @@ exports.add = async (req, res) => {
       parentId: req.body.parentId ? req.body.parentId : null,
       isRetweet: req.body.isRetweet ? Boolean(req.body.isRetweet) : false,
     });
-    if (req.files) {
+    if (req.files.length) {
       const images = [];
       req.files.forEach((file) => {
         images.push({
@@ -38,8 +38,8 @@ exports.get = async (req, res) => {
   const offset = req.query.offset ? req.query.offset : 0;
   const limit = req.query.limit ? req.query.limit : 10;
 
-  const username = req.query.username;
-  const tweetId = req.query.tweetId;
+  const username = req.query.username ? req.query.username : undefined;
+  const tweetId = req.query.tweetId ? req.query.tweetId : undefined;
   let tweets;
   let countAndTweets;
 
@@ -60,6 +60,12 @@ exports.get = async (req, res) => {
     if (user) {
       countAndTweets = await getTweets(req, order, offset, limit, {
         userId: user.id,
+        [Op.or]: [
+          { parentId: null },
+          {
+            isRetweet: true,
+          },
+        ],
       });
       tweets = countAndTweets.rows;
     } else {
@@ -81,14 +87,6 @@ exports.get = async (req, res) => {
           isRetweet: true,
         },
       ],
-
-      // [Op.or]: {
-      //   [Op.and]: [
-      //   {parentId: { [Op.gt]: 0 }},
-      //   {isRetweet: {
-      //     [Op.not]: true,
-      //   },
-      // }],
     });
     tweets = countAndTweets.rows;
   }
