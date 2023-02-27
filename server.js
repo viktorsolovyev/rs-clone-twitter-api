@@ -32,10 +32,10 @@ webSocketServer.on("connection", (ws, req) => {
 });
 
 db.sequelize
-  .sync({ force: true })
+  .sync()
   .then(() => {
-    console.log("Drop and Resync Db");
-    mock.addMockData();
+    console.log("Connected to DB");
+    // mock.addMockData();
   })
   .catch((err) => console.log(err));
 
@@ -48,9 +48,7 @@ require("./app/routes/like.routes")(app);
 require("./app/routes/view.routes")(app);
 
 const PORT = process.env.PORT || 8080;
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}.`);
-// });
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
